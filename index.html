@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <meta name="description" content="Проект РГСУ: Объективная оценка вовлеченности слушателей с применением учебных наноустройств и ИИ-аналитики в рамках занятий по технологиям аддитивного производства.">
+    <meta name="description" content="Проект РГСУ: Объективная оценка вовлеченности слушателей с применением ИИ-анализа видеопотока и нейрошлемов.">
     <meta name="theme-color" content="#0055A5">
-    <title>Оценка вовлеченности: Наноустройства и ИИ | РГСУ</title>
+    <title>Оценка вовлеченности: Видеоаналитика и ИИ | РГСУ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,10 +73,11 @@
         #preloader {
             position: fixed; inset: 0; background: #f8fafc; z-index: 10000;
             display: flex; justify-content: center; align-items: center;
+            opacity: 1; visibility: visible;
             transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
         }
         #preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
-        .loader-bar { width: 200px; height: 2px; background: #e2e8f0; position: relative; overflow: hidden; }
+        .loader-bar { width: 200px; height: 3px; background: #e2e8f0; position: relative; overflow: hidden; border-radius: 2px; }
         .loader-bar::after {
             content: ''; position: absolute; top: 0; left: 0; height: 100%; width: 50%;
             background: #0055A5; animation: load 1s infinite ease-in-out;
@@ -93,7 +94,7 @@
             border-bottom: 1px solid rgba(226, 232, 240, 0.6);
             transition: background 0.3s, padding 0.3s;
         }
-        .glass-panel.scrolled { background: rgba(255, 255, 255, 0.8); }
+        .glass-panel.scrolled { background: rgba(255, 255, 255, 0.95); shadow-md; }
         
         .btn-interactive { transition: transform 0.1s ease, box-shadow 0.2s ease; }
         .btn-interactive:active { transform: scale(0.97); }
@@ -112,7 +113,8 @@
         }
         @keyframes textShine { to { background-position: 200% center; } }
 
-        .reveal-element { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        /* Reveal Animation Styles */
+        .reveal-element { opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .reveal-element.visible { opacity: 1; transform: translateY(0); }
         .delay-100 { transition-delay: 100ms; }
         .delay-200 { transition-delay: 200ms; }
@@ -164,8 +166,8 @@
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
         #toast.error { background-color: #dc2626; }
         
-        .tg-gradient { background: linear-gradient(135deg, #2AABEE 0%, #229ED9 100%); }
-        .tg-gradient:hover { background: linear-gradient(135deg, #229ED9 0%, #1e8dbf 100%); }
+        .tg-gradient { background: linear-gradient(135deg, #0055A5 0%, #229ED9 100%); }
+        .tg-gradient:hover { background: linear-gradient(135deg, #229ED9 0%, #0055A5 100%); }
 
         input:focus:valid { border-color: #22c55e; box-shadow: 0 0 0 1px #22c55e; }
         input:not(:placeholder-shown):valid + label { color: #22c55e; }
@@ -199,37 +201,38 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900 flex flex-col min-h-screen">
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-100 selection:text-rgsu-blue flex flex-col min-h-screen">
 
+    <!-- Custom Cursor -->
     <div class="cursor-dot" id="cursor-dot"></div>
     <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- Preloader -->
     <div id="preloader"><div class="text-center"><div class="text-rgsu-blue font-mono font-bold text-xl mb-4 tracking-widest">INITIALIZING LAB...</div><div class="loader-bar"></div></div></div>
+    
+    <!-- Background Noise -->
     <div class="noise-overlay"></div>
+    
+    <!-- Scroll Progress -->
     <div id="progress-bar"></div>
 
-    <!-- Modals -->
+    <!-- Universal Modal for Video/Image -->
     <div id="universal-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="Media Preview">
         <div class="relative w-full max-w-5xl bg-transparent rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center" id="modal-container">
-            <button onclick="closeModal(event, true)" class="absolute -top-10 right-0 z-30 text-white hover:text-rgsu-blue transition-colors cursor-pointer bg-white/10 rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-md" aria-label="Close Modal">
-                <i class="fa-solid fa-xmark text-2xl"></i>
+            <button onclick="closeModal(event, true)" class="absolute -top-12 right-0 z-30 text-white hover:text-rgsu-blue transition-colors cursor-pointer bg-white/10 rounded-full w-10 h-10 flex items-center justify-center backdrop-blur-md" aria-label="Close Modal">
+                <i class="fa-solid fa-xmark text-xl"></i>
             </button>
-            <div id="modal-video" class="hidden w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-700 relative">
-                <!-- Loading Spinner for Video -->
+            <div id="modal-video" class="hidden w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-700 relative shadow-2xl">
                 <div class="video-loader">
                     <i class="fa-solid fa-circle-notch text-white text-4xl animate-spin"></i>
                 </div>
-                <iframe class="w-full h-full relative z-10" src="" title="Video Player" frameborder="0" allow="autoplay; fullscreen" loading="lazy" onload="this.parentElement.classList.add('iframe-ready')"></iframe>
+                <!-- Updated with specific Google Drive Preview Link -->
+                <iframe class="w-full h-full relative z-10" src="https://drive.google.com/file/d/1tCm7l9gN5T-VGyO0mkgCYFwsdKOt2Rzl/preview" title="Video Player" frameborder="0" allow="autoplay; fullscreen" loading="lazy" onload="this.parentElement.classList.add('iframe-ready')"></iframe>
             </div>
             <div id="modal-image" class="hidden w-full h-auto max-h-[85vh] flex items-center justify-center">
                 <img src="" alt="Gallery Preview" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl border border-slate-700/50" loading="lazy" decoding="async">
             </div>
         </div>
-    </div>
-
-    <!-- Toast -->
-    <div id="toast" class="flex items-center justify-center gap-3" role="alert">
-        <i class="fa-solid fa-check-circle text-green-400 text-lg"></i>
-        <span id="toast-message">Действие выполнено успешно!</span>
     </div>
 
     <!-- Navigation -->
@@ -294,16 +297,15 @@
                     <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rgsu-blue opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rgsu-blue"></span></span>
                     <span class="text-slate-600 text-xs font-bold tracking-widest uppercase overflow-hidden whitespace-nowrap animate-typewriter border-r-2 border-r-rgsu-blue pr-1 font-mono">Экспериментальная группа</span>
                 </div>
-                <!-- Updated Title from PDF -->
+                
                 <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-8 reveal-element" data-scramble>
                     Объективная оценка <span class="gradient-text">вовлеченности</span><br>слушателей
                 </h1>
                 
-                <!-- Updated Description from PDF -->
                 <p class="text-lg md:text-xl lg:text-2xl text-slate-600 mb-10 max-w-4xl leading-relaxed font-light reveal-element delay-100">
-                    с применением учебных наноустройств и ИИ-аналитики в рамках занятий по технологиям аддитивного производства.
+                    с применением ИИ-анализа видеопотока, данных нейрошлемов и тестирования по методике в рамках занятий по технологиям аддитивного производства.
                     <br class="hidden md:block">
-                    <span class="font-medium text-slate-900 text-base mt-2 block">Интеграция нейротехнологий и методов искусственного интеллекта в образовательный процесс инженерных дисциплин.</span>
+                    <span class="font-medium text-slate-900 text-base mt-2 block">Интеграция нейротехнологий и компьютерного зрения в образовательный процесс.</span>
                 </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center reveal-element delay-200 justify-center">
@@ -321,9 +323,9 @@
                 <div class="mt-16 pt-8 border-t border-slate-200/60 flex flex-wrap justify-center gap-x-8 gap-y-4 opacity-70 hover:opacity-100 transition-opacity duration-500 reveal-element delay-300">
                     <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-widest font-mono"><i class="fa-solid fa-layer-group"></i> Stack:</div>
                     <div class="flex gap-6 items-center font-mono text-xs">
-                        <span class="font-bold text-slate-600">RangeVision</span><span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                        <span class="font-bold text-slate-600">T-FLEX CAD</span><span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                        <span class="font-bold text-slate-600">NeuroKit</span>
+                        <span class="font-bold text-slate-600">Video AI</span><span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                        <span class="font-bold text-slate-600">NeuroHelmets</span><span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                        <span class="font-bold text-slate-600">T-FLEX CAD</span>
                     </div>
                 </div>
             </div>
@@ -337,18 +339,14 @@
     <!-- Marquee -->
     <div class="marquee-container" aria-hidden="true">
         <div class="marquee-content will-change-transform">
-            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> NEUROINTERFACE</span>
-            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> 3D SCANNING</span>
-            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> GENERATIVE ART</span>
+            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> VIDEO ANALYTICS</span>
+            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> NEUROHELMETS</span>
+            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> AI RECOGNITION</span>
             <span class="marquee-tag"><i class="fa-solid fa-circle"></i> RGSU TECHNOPARK</span>
-            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> PYTHON</span>
+            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> TESTING METHODOLOGY</span>
             <span class="marquee-tag"><i class="fa-solid fa-circle"></i> CAD SYSTEMS</span>
             <span class="marquee-tag"><i class="fa-solid fa-circle"></i> SCIENCE</span>
             <span class="marquee-tag"><i class="fa-solid fa-circle"></i> FUTURE</span>
-            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> NEUROINTERFACE</span>
-            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> 3D SCANNING</span>
-            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> GENERATIVE ART</span>
-            <span class="marquee-tag"><i class="fa-solid fa-circle"></i> RGSU TECHNOPARK</span>
         </div>
     </div>
 
@@ -358,8 +356,8 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                 <div class="p-6 md:p-8 rounded-2xl bg-slate-50 border border-slate-100 tech-card flex flex-col items-center text-center group reveal-element" data-type="neuro">
                     <div id="icon-neuro" class="icon-3d-container group-hover:scale-105 transition-transform duration-500"><div class="skeleton-loader"></div></div>
-                    <h3 class="text-lg md:text-xl font-bold text-slate-900 mb-2 md:mb-3">Нейрофизиология</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">Регистрация и анализ ЭЭГ-сигналов. Изучение корреляции между когнитивной нагрузкой и геометрией.</p>
+                    <h3 class="text-lg md:text-xl font-bold text-slate-900 mb-2 md:mb-3">Видеоаналитика и Нейро</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">Первичный анализ видеопотока нейросетями и снятие данных с нейрошлемов в процессе тестирования по методике.</p>
                 </div>
                 <div class="p-6 md:p-8 rounded-2xl bg-slate-50 border border-slate-100 tech-card flex flex-col items-center text-center group reveal-element delay-100" data-type="reverse">
                     <div id="icon-reverse" class="icon-3d-container group-hover:scale-105 transition-transform duration-500"><div class="skeleton-loader"></div></div>
@@ -450,7 +448,7 @@
                 <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-200 hidden md:block"><div id="roadmap-progress" class="w-full bg-rgsu-blue absolute top-0 left-0 transition-all duration-500 ease-out" style="height: 0%"></div></div>
                 <div class="relative flex flex-col md:flex-row gap-4 md:gap-8 mb-8 md:mb-12 group roadmap-step reveal-element">
                     <div class="flex-shrink-0 w-16 h-16 rounded-full bg-white border-4 border-rgsu-blue flex items-center justify-center shadow-lg absolute md:relative z-10 roadmap-marker top-0 md:top-auto overflow-hidden"><div id="roadmap-step-1" class="roadmap-3d-container"></div></div>
-                    <div class="pt-1 md:pt-3 pl-14 md:pl-0 w-full"><h3 class="text-lg md:text-xl font-bold text-slate-900">Сбор биометрических данных</h3><p class="text-sm md:text-base text-slate-600 mt-1 md:mt-2">Калибровка нейроинтерфейса. Запись паттернов ЭЭГ при просмотре референсных изображений.</p></div>
+                    <div class="pt-1 md:pt-3 pl-14 md:pl-0 w-full"><h3 class="text-lg md:text-xl font-bold text-slate-900">Тестирование и Анализ</h3><p class="text-sm md:text-base text-slate-600 mt-1 md:mt-2">Запуск тестирования по методике. ИИ анализирует видеопоток, нейрошлемы фиксируют ЭЭГ-активность.</p></div>
                 </div>
                 <div class="relative flex flex-col md:flex-row gap-4 md:gap-8 mb-8 md:mb-12 group roadmap-step reveal-element delay-100">
                     <div class="flex-shrink-0 w-16 h-16 rounded-full bg-white border-4 border-indigo-500 flex items-center justify-center shadow-lg absolute md:relative z-10 roadmap-marker top-0 md:top-auto overflow-hidden"><div id="roadmap-step-2" class="roadmap-3d-container"></div></div>
@@ -499,7 +497,7 @@
                     <button class="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none" onclick="this.parentElement.classList.toggle('active')">
                         <span class="font-semibold text-slate-800">Какой формат участия?</span><i class="fa-solid fa-chevron-down text-slate-400 faq-icon"></i>
                     </button>
-                    <div class="faq-content bg-slate-50"><div class="px-6 py-4 text-sm text-slate-600">Это 3-х часовой интенсив, в ходе которого участники проходят путь от снятия ЭЭГ до создания своего цифрового прототипа.</div></div>
+                    <div class="faq-content bg-slate-50"><div class="px-6 py-4 text-sm text-slate-600">Это 3-х часовой интенсив, в ходе которого участники проходят путь от тестирования по методике и снятия показаний до создания своего цифрового прототипа.</div></div>
                 </div>
             </div>
         </div>
@@ -544,18 +542,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const preloader = document.getElementById('preloader');
+            
+            // Smoother Preloader Logic
             window.addEventListener('load', () => {
                 setTimeout(() => {
                     if(preloader) preloader.classList.add('loaded');
                     document.body.style.overflow = 'auto';
-                }, 800);
+                }, 600); // Slightly faster removal for better UX
             });
+            // Fallback
             setTimeout(() => {
                 if(preloader && !preloader.classList.contains('loaded')) {
                      preloader.classList.add('loaded');
                      document.body.style.overflow = 'auto';
                 }
-            }, 5000);
+            }, 3000); // Reduced fallback time
 
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -582,12 +583,14 @@
                             updateCounter();
                         }
                     } else {
+                        // Optional: remove visible class to re-animate on scroll up? 
+                        // Better to keep it visible once shown for smoother UX on this type of site.
                         if(entry.target.classList.contains('roadmap-marker')) {
                             entry.target.classList.remove('animate-pulse');
                         }
                     }
                 });
-            }, { threshold: 0.1 });
+            }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }); // Improved rootMargin for earlier trigger
 
             document.querySelectorAll('.reveal-element, .roadmap-marker').forEach((el) => {
                 observer.observe(el);
@@ -608,9 +611,9 @@
             let w, h, particles = [];
             
             const isMobile = window.innerWidth < 768;
-            const particleCount = isMobile ? 20 : 60;
-            const connectionDistance = 150;
-            const mouseDistance = 200;
+            const particleCount = isMobile ? 25 : 70; // Slightly increased count
+            const connectionDistance = 160;
+            const mouseDistance = 220;
 
             let mouse = { x: null, y: null };
             let animationFrameId;
@@ -635,7 +638,7 @@
             class Particle {
                 constructor() {
                     this.x = Math.random() * w; this.y = Math.random() * h;
-                    this.vx = (Math.random() - 0.5) * 0.5; this.vy = (Math.random() - 0.5) * 0.5;
+                    this.vx = (Math.random() - 0.5) * 0.4; this.vy = (Math.random() - 0.5) * 0.4; // Slower, smoother movement
                     this.size = Math.random() * 2 + 1;
                 }
                 update() {
@@ -655,7 +658,7 @@
                 }
                 draw() {
                     ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(0, 85, 165, 0.5)'; ctx.fill();
+                    ctx.fillStyle = 'rgba(0, 85, 165, 0.4)'; ctx.fill(); // Consistent RGSU Blue
                 }
             }
 
@@ -693,7 +696,10 @@
                 modal.classList.remove('hidden'); document.body.style.overflow = 'hidden';
             } else {
                 modal.classList.add('hidden'); document.body.style.overflow = '';
+                // Don't clear iframe src to allow caching, just hide
                 videoContent.classList.add('hidden'); imageContent.classList.add('hidden');
+                
+                // Stop video by resetting src (optional, good for stopping audio)
                 const iframe = videoContent.querySelector('iframe');
                 if(iframe) { const src = iframe.src; iframe.src = src; }
             }
