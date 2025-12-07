@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <meta name="description" content="Презентация эксперимента РГСУ по синтезу биосигналов и цифрового проектирования.">
+    <meta name="description" content="Презентация эксперимента РГСУ: Технопарк и Медицинская высшая школа.">
     <meta name="theme-color" content="#0055A5">
     <title>Эксперимент РГСУ: Нейротехнологии и 3D</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,6 +29,7 @@
                         'typewriter': 'typewriter 2s steps(40) 1s 1 normal both, blinkTextCursor 500ms steps(40) infinite normal',
                         'bounce-slow': 'bounce 2s infinite',
                         'marquee': 'marquee 25s linear infinite',
+                        'spin-slow': 'spin 3s linear infinite',
                     },
                     keyframes: {
                         blob: {
@@ -147,6 +148,13 @@
         #universal-modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
         #universal-modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
+        /* Video Loader Styles */
+        .video-loader {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 10; pointer-events: none;
+        }
+        .iframe-ready .video-loader { display: none; }
+
         #toast {
             visibility: hidden; min-width: 250px; background-color: #333; color: #fff;
             text-align: center; border-radius: 8px; padding: 16px; position: fixed;
@@ -162,14 +170,6 @@
 
         input:focus:valid { border-color: #22c55e; box-shadow: 0 0 0 1px #22c55e; }
         input:not(:placeholder-shown):valid + label { color: #22c55e; }
-
-        .countdown-item {
-            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px); border-radius: 8px; padding: 10px;
-            min-width: 60px; text-align: center;
-        }
-        .countdown-value { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700; color: white; }
-        .countdown-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-top: 2px; }
 
         .marquee-container {
             overflow: hidden; white-space: nowrap; background: #0f172a;
@@ -211,11 +211,15 @@
     <!-- Modals -->
     <div id="universal-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="Media Preview">
         <div class="relative w-full max-w-5xl bg-transparent rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center" id="modal-container">
-            <button onclick="closeModal(event, true)" class="absolute -top-12 right-0 z-30 text-white hover:text-rgsu-blue transition-colors cursor-pointer bg-white/10 rounded-full w-10 h-10 flex items-center justify-center" data-hover aria-label="Close Modal">
-                <i class="fa-solid fa-xmark text-xl"></i>
+            <button onclick="closeModal(event, true)" class="absolute -top-10 right-0 z-30 text-white hover:text-rgsu-blue transition-colors cursor-pointer bg-white/10 rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-md" aria-label="Close Modal">
+                <i class="fa-solid fa-xmark text-2xl"></i>
             </button>
-            <div id="modal-video" class="hidden w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-700">
-                <iframe class="w-full h-full" src="" title="Video Player" frameborder="0" allow="autoplay; fullscreen" loading="lazy"></iframe>
+            <div id="modal-video" class="hidden w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-700 relative">
+                <!-- Loading Spinner for Video -->
+                <div class="video-loader">
+                    <i class="fa-solid fa-circle-notch text-white text-4xl animate-spin"></i>
+                </div>
+                <iframe class="w-full h-full relative z-10" src="" title="Video Player" frameborder="0" allow="autoplay; fullscreen" loading="lazy" onload="this.parentElement.classList.add('iframe-ready')"></iframe>
             </div>
             <div id="modal-image" class="hidden w-full h-auto max-h-[85vh] flex items-center justify-center">
                 <img src="" alt="Gallery Preview" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl border border-slate-700/50" loading="lazy" decoding="async">
@@ -226,40 +230,42 @@
     <!-- Toast -->
     <div id="toast" class="flex items-center justify-center gap-3" role="alert">
         <i class="fa-solid fa-check-circle text-green-400 text-lg"></i>
-        <span id="toast-message">Заявка успешно отправлена!</span>
+        <span id="toast-message">Действие выполнено успешно!</span>
     </div>
 
     <!-- Navigation -->
     <nav class="fixed w-full z-50 glass-panel shadow-sm transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
-                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onclick="window.scrollTo(0,0)" data-hover>
+                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onclick="window.scrollTo(0,0)">
                     <img class="h-10 md:h-12 w-auto object-contain transition-transform group-hover:scale-105" src="https://upload.wikimedia.org/wikipedia/ru/4/42/%D0%A0%D0%93%D0%A1%D0%A3_%D0%BB%D0%BE%D0%B3%D0%BE%D1%82%D0%B8%D0%BF.png" alt="РГСУ Логотип" width="48" height="48" loading="lazy">
                     <div class="hidden lg:block leading-tight">
                         <div class="text-sm font-bold text-slate-900 tracking-wide uppercase">Студенческое КБ</div>
                         <div class="text-xs text-slate-500 font-medium text-rgsu-blue font-mono">LAB: NEURO-3D</div>
                     </div>
                 </div>
+                
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-2 lg:space-x-4">
-                        <a href="#about" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all" data-hover>О проекте</a>
-                        <a href="#competencies" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all" data-hover>Навыки</a>
-                        <a href="#software" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all" data-hover>Софт</a>
-                        <a href="#roadmap" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all" data-hover>План</a>
-                        <a href="#gallery" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all" data-hover>Галерея</a>
-                        <a href="#faq" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all" data-hover>FAQ</a>
-                        <a href="https://t.me/TechnoparkRGSU" target="_blank" class="btn-interactive tg-gradient text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:shadow-lg transition-all ml-4 flex items-center gap-2" data-hover data-magnetic>
+                        <a href="#about" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all">О проекте</a>
+                        <a href="#organizers" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all">Организаторы</a>
+                        <a href="#software" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all">Софт</a>
+                        <a href="#roadmap" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all">План</a>
+                        <a href="#faq" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all">FAQ</a>
+                        <a href="https://t.me/DTRSSU" target="_blank" class="btn-interactive tg-gradient text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:shadow-lg transition-all ml-4 flex items-center gap-2" data-magnetic>
                             <i class="fa-brands fa-telegram text-lg"></i> Telegram
                         </a>
                     </div>
                 </div>
+
                 <div class="-mr-2 flex md:hidden">
-                    <button type="button" id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-rgsu-blue hover:bg-blue-50 focus:outline-none transition-colors" aria-expanded="false" aria-label="Open Menu" data-hover>
+                    <button type="button" id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-rgsu-blue hover:bg-blue-50 focus:outline-none transition-colors" aria-expanded="false" aria-label="Open Menu">
                         <i class="fa-solid fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
         </div>
+
         <div class="hidden md:hidden fixed inset-0 z-40" id="mobile-menu-overlay" aria-hidden="true">
             <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="mobile-backdrop"></div>
             <div class="absolute right-0 top-0 h-full w-64 bg-white shadow-2xl p-6 transform transition-transform duration-300 translate-x-full" id="mobile-drawer">
@@ -268,12 +274,11 @@
                 </div>
                 <div class="flex flex-col space-y-4">
                     <a href="#about" class="mobile-link block text-base font-medium text-slate-700 hover:text-rgsu-blue">О проекте</a>
-                    <a href="#competencies" class="mobile-link block text-base font-medium text-slate-700 hover:text-rgsu-blue">Навыки</a>
+                    <a href="#organizers" class="mobile-link block text-base font-medium text-slate-700 hover:text-rgsu-blue">Организаторы</a>
                     <a href="#software" class="mobile-link block text-base font-medium text-slate-700 hover:text-rgsu-blue">Софт</a>
                     <a href="#roadmap" class="mobile-link block text-base font-medium text-slate-700 hover:text-rgsu-blue">План</a>
-                    <a href="#gallery" class="mobile-link block text-base font-medium text-slate-700 hover:text-rgsu-blue">Галерея</a>
                     <a href="#faq" class="mobile-link block text-base font-medium text-slate-700 hover:text-rgsu-blue">FAQ</a>
-                    <a href="https://t.me/TechnoparkRGSU" target="_blank" class="mobile-link btn-interactive block w-full text-center tg-gradient text-white px-3 py-3 rounded-lg text-base font-bold mt-4 shadow-md">
+                    <a href="https://t.me/DTRSSU" target="_blank" class="mobile-link btn-interactive block w-full text-center tg-gradient text-white px-3 py-3 rounded-lg text-base font-bold mt-4 shadow-md">
                         <i class="fa-brands fa-telegram mr-2"></i> Telegram
                     </a>
                 </div>
@@ -286,23 +291,23 @@
         <canvas id="neuro-canvas" class="will-change-transform"></canvas>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
             <div class="flex flex-col items-center text-center">
-                <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white border border-blue-100 shadow-sm backdrop-blur-sm mb-8 transition-transform hover:scale-105 cursor-default group" data-hover>
+                <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white border border-blue-100 shadow-sm backdrop-blur-sm mb-8 transition-transform hover:scale-105 cursor-default group">
                     <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rgsu-blue opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rgsu-blue"></span></span>
-                    <span class="text-slate-600 text-xs font-bold tracking-widest uppercase overflow-hidden whitespace-nowrap animate-typewriter border-r-2 border-r-rgsu-blue pr-1 font-mono">Экспериментальная группа 2025/2026</span>
+                    <span class="text-slate-600 text-xs font-bold tracking-widest uppercase overflow-hidden whitespace-nowrap animate-typewriter border-r-2 border-r-rgsu-blue pr-1 font-mono">Экспериментальная группа</span>
                 </div>
                 <h1 class="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-8 reveal-element" data-scramble>Синтез <span class="gradient-text">Биосигналов</span><br>и Цифрового Проектирования</h1>
                 <p class="text-lg md:text-xl lg:text-2xl text-slate-600 mb-10 max-w-3xl leading-relaxed font-light reveal-element delay-100">
                     Интеграция нейроинтерфейсов в процессы инженерного 3D-моделирования. <br class="hidden md:block"><span class="font-medium text-slate-900">Создаем адаптивные формы, управляемые активностью мозга.</span>
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center reveal-element delay-200 justify-center">
-                    <button onclick="openVideoModal()" class="btn-interactive group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white transition-all duration-200 bg-rgsu-blue rounded-full shadow-lg hover:bg-blue-700 hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 w-full sm:w-auto" data-hover data-magnetic>
+                    <button onclick="openVideoModal()" class="btn-interactive group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white transition-all duration-200 bg-rgsu-blue rounded-full shadow-lg hover:bg-blue-700 hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 w-full sm:w-auto" data-magnetic>
                         <span class="mr-3">Смотреть обзор</span>
                         <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform border border-white/30"><i class="fa-solid fa-play text-[10px] pl-0.5"></i></div>
                     </button>
-                    <a href="https://drive.google.com/file/d/1yoXaLPPu-F7f5qolYfQB8LnRq-0EnnPv/view?usp=drive_link" target="_blank" class="btn-interactive inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-600 transition-all duration-200 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:text-rgsu-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-200 w-full sm:w-auto group" data-hover data-magnetic aria-label="Download PDF Manual">
+                    <a href="https://drive.google.com/file/d/1yoXaLPPu-F7f5qolYfQB8LnRq-0EnnPv/view?usp=drive_link" target="_blank" class="btn-interactive inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-600 transition-all duration-200 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:text-rgsu-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-200 w-full sm:w-auto group" data-magnetic aria-label="Download PDF Manual">
                          <i class="fa-solid fa-file-pdf text-red-500 mr-2 group-hover:scale-110 transition-transform"></i><span>Методичка (PDF)</span>
                     </a>
-                    <a href="https://drive.google.com/file/d/1SVA_Y8W9bML1xAlemNewiwFMmkh6oEF0/view?usp=drive_link" target="_blank" class="btn-interactive inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-600 transition-all duration-200 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:text-rgsu-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-200 w-full sm:w-auto group" data-hover data-magnetic aria-label="Download Presentation">
+                    <a href="https://drive.google.com/file/d/1SVA_Y8W9bML1xAlemNewiwFMmkh6oEF0/view?usp=drive_link" target="_blank" class="btn-interactive inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-600 transition-all duration-200 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:text-rgsu-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-200 w-full sm:w-auto group" data-magnetic aria-label="Download Presentation">
                          <i class="fa-solid fa-file-powerpoint text-orange-500 mr-2 group-hover:scale-110 transition-transform"></i><span>Презентация</span>
                     </a>
                 </div>
@@ -344,17 +349,17 @@
     <section id="about" class="py-16 md:py-24 bg-white border-y border-slate-100 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                <div class="p-6 md:p-8 rounded-2xl bg-slate-50 border border-slate-100 tech-card flex flex-col items-center text-center group reveal-element" data-type="neuro" data-hover>
+                <div class="p-6 md:p-8 rounded-2xl bg-slate-50 border border-slate-100 tech-card flex flex-col items-center text-center group reveal-element" data-type="neuro">
                     <div id="icon-neuro" class="icon-3d-container group-hover:scale-105 transition-transform duration-500"><div class="skeleton-loader"></div></div>
                     <h3 class="text-lg md:text-xl font-bold text-slate-900 mb-2 md:mb-3">Нейрофизиология</h3>
                     <p class="text-slate-600 text-sm leading-relaxed">Регистрация и анализ ЭЭГ-сигналов. Изучение корреляции между когнитивной нагрузкой и геометрией.</p>
                 </div>
-                <div class="p-6 md:p-8 rounded-2xl bg-slate-50 border border-slate-100 tech-card flex flex-col items-center text-center group reveal-element delay-100" data-type="reverse" data-hover>
+                <div class="p-6 md:p-8 rounded-2xl bg-slate-50 border border-slate-100 tech-card flex flex-col items-center text-center group reveal-element delay-100" data-type="reverse">
                     <div id="icon-reverse" class="icon-3d-container group-hover:scale-105 transition-transform duration-500"><div class="skeleton-loader"></div></div>
                     <h3 class="text-lg md:text-xl font-bold text-slate-900 mb-2 md:mb-3">Реверс-инжиниринг</h3>
                     <p class="text-slate-600 text-sm leading-relaxed">Оцифровка объектов с помощью 3D-сканеров RangeVision и их параметрическая модификация.</p>
                 </div>
-                <div class="p-6 md:p-8 rounded-2xl bg-slate-50 border border-slate-100 tech-card flex flex-col items-center text-center group reveal-element delay-200" data-type="generative" data-hover>
+                <div class="p-6 md:p-8 rounded-2xl bg-slate-50 border border-slate-100 tech-card flex flex-col items-center text-center group reveal-element delay-200" data-type="generative">
                     <div id="icon-generative" class="icon-3d-container group-hover:scale-105 transition-transform duration-500"><div class="skeleton-loader"></div></div>
                     <h3 class="text-lg md:text-xl font-bold text-slate-900 mb-2 md:mb-3">Генеративный Дизайн</h3>
                     <p class="text-slate-600 text-sm leading-relaxed">Применение алгоритмов ИИ для генерации форм на основе текстовых и нейро-промптов.</p>
@@ -363,29 +368,29 @@
         </div>
     </section>
 
-    <!-- Competencies -->
-    <section id="competencies" class="py-16 md:py-24 bg-slate-50 scroll-mt-20 border-b border-slate-200">
+    <!-- Organizers -->
+    <section id="organizers" class="py-16 md:py-24 bg-white border-t border-slate-100 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10 md:mb-16 reveal-element">
-                <span class="text-rgsu-blue font-bold tracking-wider uppercase text-xs md:text-sm font-mono">ОБУЧЕНИЕ</span>
-                <h2 class="text-2xl md:text-4xl font-extrabold text-slate-900 mt-2" data-scramble>Ключевые компетенции</h2>
+                <span class="text-rgsu-blue font-bold tracking-wider uppercase text-xs md:text-sm font-mono">СТРУКТУРА</span>
+                <h2 class="text-2xl md:text-4xl font-extrabold text-slate-900 mt-2" data-scramble>Организаторы эксперимента</h2>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg transition-all reveal-element">
-                    <h3 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fa-solid fa-wrench text-rgsu-blue"></i> Hard Skills</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-3"><span class="w-6 h-6 rounded-full bg-blue-100 text-rgsu-blue flex items-center justify-center text-xs font-bold mt-0.5">1</span><div><span class="font-bold text-slate-800 block">3D-Сканирование</span><span class="text-sm text-slate-500">Работа с RangeVision Spectrum, калибровка, постобработка облака точек.</span></div></li>
-                        <li class="flex items-start gap-3"><span class="w-6 h-6 rounded-full bg-blue-100 text-rgsu-blue flex items-center justify-center text-xs font-bold mt-0.5">2</span><div><span class="font-bold text-slate-800 block">Параметрическое CAD</span><span class="text-sm text-slate-500">Создание адаптивных моделей в T-FLEX CAD, работа с переменными.</span></div></li>
-                        <li class="flex items-start gap-3"><span class="w-6 h-6 rounded-full bg-blue-100 text-rgsu-blue flex items-center justify-center text-xs font-bold mt-0.5">3</span><div><span class="font-bold text-slate-800 block">Анализ биоданных</span><span class="text-sm text-slate-500">Сбор ЭЭГ, фильтрация сигналов, использование Python библиотек (MNE, NeuroKit).</span></div></li>
-                    </ul>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Technopark -->
+                <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center text-center reveal-element delay-100 tech-card hover:border-rgsu-blue transition-colors">
+                    <div class="w-24 h-24 rounded-full bg-white mb-6 flex items-center justify-center border-4 border-rgsu-blue/10 shadow-md">
+                        <i class="fa-solid fa-microchip text-4xl text-rgsu-blue"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-2">Технопарк РГСУ</h4>
+                    <p class="text-slate-600 text-sm">Центр обучения, профориентации и проектной деятельности в области IT-технологий.</p>
                 </div>
-                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg transition-all reveal-element delay-100">
-                    <h3 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fa-solid fa-lightbulb text-purple-600"></i> Soft Skills & Research</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-3"><span class="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold mt-0.5">1</span><div><span class="font-bold text-slate-800 block">Научная работа</span><span class="text-sm text-slate-500">Написание статей (РИНЦ/Scopus), выступление на конференциях.</span></div></li>
-                        <li class="flex items-start gap-3"><span class="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold mt-0.5">2</span><div><span class="font-bold text-slate-800 block">Междисциплинарность</span><span class="text-sm text-slate-500">Взаимодействие в команде инженеров, программистов и психологов.</span></div></li>
-                        <li class="flex items-start gap-3"><span class="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold mt-0.5">3</span><div><span class="font-bold text-slate-800 block">Управление проектами</span><span class="text-sm text-slate-500">Работа по методологии Agile в рамках задач Технопарка.</span></div></li>
-                    </ul>
+                <!-- Medical School -->
+                <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center text-center reveal-element delay-200 tech-card hover:border-red-500 transition-colors">
+                    <div class="w-24 h-24 rounded-full bg-white mb-6 flex items-center justify-center border-4 border-red-500/10 shadow-md">
+                        <i class="fa-solid fa-heart-pulse text-4xl text-red-500"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-2">Медицинская ВШ РГСУ</h4>
+                    <p class="text-slate-600 text-sm">Методологическая поддержка, анализ нейрофизиологических данных и биометрии.</p>
                 </div>
             </div>
         </div>
@@ -400,7 +405,7 @@
                 <h2 class="text-2xl md:text-4xl font-extrabold text-slate-900 mt-2" data-scramble>ПО и Нейросети</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
-                <div class="md:col-span-7 bg-slate-50 rounded-2xl p-6 md:p-8 border border-slate-200 reveal-element delay-100 tech-card" data-hover>
+                <div class="md:col-span-7 bg-slate-50 rounded-2xl p-6 md:p-8 border border-slate-200 reveal-element delay-100 tech-card">
                     <h3 class="text-xl md:text-2xl font-bold mb-4 md:mb-6 flex items-center gap-3"><i class="fa-solid fa-compass-drafting text-blue-600"></i> Российские CAD</h3>
                     <div class="space-y-4 md:space-y-6">
                         <div class="flex gap-4 items-start">
@@ -415,11 +420,11 @@
                     </div>
                 </div>
                 <div class="md:col-span-5 space-y-4 md:space-y-6 reveal-element delay-200">
-                    <a href="https://huggingface.co/" target="_blank" class="block p-5 md:p-6 rounded-2xl bg-gradient-to-br from-yellow-50 to-orange-50 border border-orange-100 hover:shadow-lg transition-all group tech-card" data-hover>
+                    <a href="https://huggingface.co/" target="_blank" class="block p-5 md:p-6 rounded-2xl bg-gradient-to-br from-yellow-50 to-orange-50 border border-orange-100 hover:shadow-lg transition-all group tech-card">
                         <div class="flex justify-between items-start mb-3 md:mb-4"><div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-lg md:text-xl">🤗</div><i class="fa-solid fa-arrow-up-right-from-square text-orange-300 group-hover:text-orange-500 transition-colors"></i></div>
                         <h4 class="text-lg md:text-xl font-bold text-slate-900">Hugging Face</h4><p class="text-xs md:text-sm text-slate-600 mt-2">Библиотека предобученных моделей для обработки данных.</p>
                     </a>
-                    <a href="https://lmarena.ai/" target="_blank" class="block p-5 md:p-6 rounded-2xl bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 hover:shadow-lg transition-all group tech-card" data-hover>
+                    <a href="https://lmarena.ai/" target="_blank" class="block p-5 md:p-6 rounded-2xl bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 hover:shadow-lg transition-all group tech-card">
                         <div class="flex justify-between items-start mb-3 md:mb-4"><div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-lg md:text-xl">⚔️</div><i class="fa-solid fa-arrow-up-right-from-square text-indigo-300 group-hover:text-indigo-500 transition-colors"></i></div>
                         <h4 class="text-lg md:text-xl font-bold text-slate-900">LM Arena (LMSYS)</h4><p class="text-xs md:text-sm text-slate-600 mt-2">Бенчмаркинг LLM для генерации скриптов.</p>
                     </a>
@@ -437,49 +442,16 @@
             <div class="relative pl-2 md:pl-0">
                 <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-200 hidden md:block"><div id="roadmap-progress" class="w-full bg-rgsu-blue absolute top-0 left-0 transition-all duration-500 ease-out" style="height: 0%"></div></div>
                 <div class="relative flex flex-col md:flex-row gap-4 md:gap-8 mb-8 md:mb-12 group roadmap-step reveal-element">
-                    <div class="flex-shrink-0 w-16 h-16 rounded-full bg-white border-4 border-rgsu-blue flex items-center justify-center shadow-lg absolute md:relative z-10 roadmap-marker top-0 md:top-auto overflow-hidden" data-hover><div id="roadmap-step-1" class="roadmap-3d-container"></div></div>
+                    <div class="flex-shrink-0 w-16 h-16 rounded-full bg-white border-4 border-rgsu-blue flex items-center justify-center shadow-lg absolute md:relative z-10 roadmap-marker top-0 md:top-auto overflow-hidden"><div id="roadmap-step-1" class="roadmap-3d-container"></div></div>
                     <div class="pt-1 md:pt-3 pl-14 md:pl-0 w-full"><h3 class="text-lg md:text-xl font-bold text-slate-900">Сбор биометрических данных</h3><p class="text-sm md:text-base text-slate-600 mt-1 md:mt-2">Калибровка нейроинтерфейса. Запись паттернов ЭЭГ при просмотре референсных изображений.</p></div>
                 </div>
                 <div class="relative flex flex-col md:flex-row gap-4 md:gap-8 mb-8 md:mb-12 group roadmap-step reveal-element delay-100">
-                    <div class="flex-shrink-0 w-16 h-16 rounded-full bg-white border-4 border-indigo-500 flex items-center justify-center shadow-lg absolute md:relative z-10 roadmap-marker top-0 md:top-auto overflow-hidden" data-hover><div id="roadmap-step-2" class="roadmap-3d-container"></div></div>
+                    <div class="flex-shrink-0 w-16 h-16 rounded-full bg-white border-4 border-indigo-500 flex items-center justify-center shadow-lg absolute md:relative z-10 roadmap-marker top-0 md:top-auto overflow-hidden"><div id="roadmap-step-2" class="roadmap-3d-container"></div></div>
                     <div class="pt-1 md:pt-3 pl-14 md:pl-0 w-full"><h3 class="text-lg md:text-xl font-bold text-slate-900">3D Сканирование и Базис</h3><p class="text-sm md:text-base text-slate-600 mt-1 md:mt-2">Использование RangeVision Spectrum для получения облака точек физического объекта. Импорт в CAD.</p></div>
                 </div>
                 <div class="relative flex flex-col md:flex-row gap-4 md:gap-8 group roadmap-step reveal-element delay-200">
-                    <div class="flex-shrink-0 w-16 h-16 rounded-full bg-white border-4 border-purple-500 flex items-center justify-center shadow-lg absolute md:relative z-10 roadmap-marker top-0 md:top-auto overflow-hidden" data-hover><div id="roadmap-step-3" class="roadmap-3d-container"></div></div>
+                    <div class="flex-shrink-0 w-16 h-16 rounded-full bg-white border-4 border-purple-500 flex items-center justify-center shadow-lg absolute md:relative z-10 roadmap-marker top-0 md:top-auto overflow-hidden"><div id="roadmap-step-3" class="roadmap-3d-container"></div></div>
                     <div class="pt-1 md:pt-3 pl-14 md:pl-0 w-full"><h3 class="text-lg md:text-xl font-bold text-slate-900">Генеративная модификация</h3><p class="text-sm md:text-base text-slate-600 mt-1 md:mt-2">Скрипт на Python считывает данные BCI и через API управляет параметрами модели.</p></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Gallery -->
-    <section id="gallery" class="py-16 md:py-24 bg-white border-t border-slate-100 scroll-mt-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-10 md:mb-16 reveal-element">
-                <span class="text-rgsu-blue font-bold tracking-wider uppercase text-xs md:text-sm font-mono">ВИЗУАЛИЗАЦИЯ</span>
-                <h2 class="text-2xl md:text-4xl font-extrabold text-slate-900 mt-2" data-scramble>Галерея результатов</h2>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="group relative overflow-hidden rounded-2xl h-64 cursor-pointer reveal-element" data-hover onclick="openImageModal('https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=1200&auto=format&fit=crop')">
-                    <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-slate-900/0 transition-colors z-10"></div>
-                    <img src="https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=800&auto=format&fit=crop" alt="Abstract 3D Shape" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async">
-                    <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
-                        <h4 class="text-white font-bold text-lg">Биоморфная структура #1</h4><p class="text-slate-300 text-xs">Сгенерировано по ЭЭГ (Альфа-ритм)</p>
-                    </div>
-                </div>
-                <div class="group relative overflow-hidden rounded-2xl h-64 cursor-pointer reveal-element delay-100" data-hover onclick="openImageModal('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop')">
-                    <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-slate-900/0 transition-colors z-10"></div>
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" alt="Abstract 3D Shape" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async">
-                    <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
-                        <h4 class="text-white font-bold text-lg">Параметрический узор</h4><p class="text-slate-300 text-xs">T-FLEX CAD + Python Script</p>
-                    </div>
-                </div>
-                <div class="group relative overflow-hidden rounded-2xl h-64 cursor-pointer reveal-element delay-200" data-hover onclick="openImageModal('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop')">
-                    <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-slate-900/0 transition-colors z-10"></div>
-                    <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" alt="Abstract 3D Shape" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async">
-                    <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
-                        <h4 class="text-white font-bold text-lg">Нейро-топология</h4><p class="text-slate-300 text-xs">Оптимизация формы под нагрузкой</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -489,34 +461,10 @@
     <section class="py-12 bg-slate-900 text-white border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center" id="stats-container">
-                <div class="reveal-element"><div class="text-3xl md:text-4xl font-bold font-mono text-blue-400 mb-1" data-target="120">0</div><div class="text-xs text-slate-400 uppercase tracking-widest">Часов ЭЭГ</div></div>
-                <div class="reveal-element delay-100"><div class="text-3xl md:text-4xl font-bold font-mono text-purple-400 mb-1" data-target="50">0</div><div class="text-xs text-slate-400 uppercase tracking-widest">3D-прототипов</div></div>
-                <div class="reveal-element delay-200"><div class="text-3xl md:text-4xl font-bold font-mono text-green-400 mb-1" data-target="15">0</div><div class="text-xs text-slate-400 uppercase tracking-widest">Участников</div></div>
+                <div class="reveal-element"><div class="text-3xl md:text-4xl font-bold font-mono text-blue-400 mb-1" data-target="140">0</div><div class="text-xs text-slate-400 uppercase tracking-widest">Участников</div></div>
+                <div class="reveal-element delay-100"><div class="text-3xl md:text-4xl font-bold font-mono text-purple-400 mb-1" data-target="420">0</div><div class="text-xs text-slate-400 uppercase tracking-widest">Часов ЭЭГ</div></div>
+                <div class="reveal-element delay-200"><div class="text-3xl md:text-4xl font-bold font-mono text-green-400 mb-1" data-target="140">0</div><div class="text-xs text-slate-400 uppercase tracking-widest">3D-прототипов</div></div>
                 <div class="reveal-element delay-300"><div class="text-3xl md:text-4xl font-bold font-mono text-yellow-400 mb-1" data-target="3">0</div><div class="text-xs text-slate-400 uppercase tracking-widest">Публикации</div></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Mentors -->
-    <section id="mentors" class="py-16 md:py-24 bg-white border-t border-slate-100 scroll-mt-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-10 md:mb-16 reveal-element">
-                <span class="text-rgsu-blue font-bold tracking-wider uppercase text-xs md:text-sm font-mono">Эксперты</span>
-                <h2 class="text-2xl md:text-4xl font-extrabold text-slate-900 mt-2" data-scramble>Команда наставников</h2>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center text-center reveal-element delay-100 tech-card" data-hover>
-                    <div class="w-24 h-24 rounded-full bg-gray-200 mb-4 overflow-hidden border-4 border-white shadow-md"><img src="https://ui-avatars.com/api/?name=Ivan+Petrov&background=0055A5&color=fff" alt="Наставник 1" class="w-full h-full object-cover" loading="lazy" decoding="async"></div>
-                    <h4 class="text-lg font-bold text-slate-900">Иван Петров</h4><p class="text-rgsu-blue text-sm font-medium mb-2 font-mono">Руководитель лаборатории</p><p class="text-slate-600 text-xs">Эксперт в области нейроинтерфейсов и биометрии.</p>
-                </div>
-                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center text-center reveal-element delay-200 tech-card" data-hover>
-                    <div class="w-24 h-24 rounded-full bg-gray-200 mb-4 overflow-hidden border-4 border-white shadow-md"><img src="https://ui-avatars.com/api/?name=Anna+Sidorova&background=4f46e5&color=fff" alt="Наставник 2" class="w-full h-full object-cover" loading="lazy" decoding="async"></div>
-                    <h4 class="text-lg font-bold text-slate-900">Анна Сидорова</h4><p class="text-indigo-600 text-sm font-medium mb-2 font-mono">Ведущий инженер</p><p class="text-slate-600 text-xs">Специалист по T-FLEX CAD и аддитивным технологиям.</p>
-                </div>
-                 <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center text-center reveal-element delay-300 tech-card" data-hover>
-                    <div class="w-24 h-24 rounded-full bg-gray-200 mb-4 overflow-hidden border-4 border-white shadow-md"><img src="https://ui-avatars.com/api/?name=Oleg+Kozlov&background=9333ea&color=fff" alt="Наставник 3" class="w-full h-full object-cover" loading="lazy" decoding="async"></div>
-                    <h4 class="text-lg font-bold text-slate-900">Олег Козлов</h4><p class="text-purple-600 text-sm font-medium mb-2 font-mono">AI Архитектор</p><p class="text-slate-600 text-xs">Разработка генеративных моделей и Python-скриптов.</p>
-                </div>
             </div>
         </div>
     </section>
@@ -529,22 +477,22 @@
             </div>
             <div class="space-y-4">
                 <div class="bg-white rounded-xl border border-slate-200 overflow-hidden faq-item reveal-element delay-100">
-                    <button class="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none" onclick="this.parentElement.classList.toggle('active')" data-hover>
-                        <span class="font-semibold text-slate-800">Нужен ли опыт программирования?</span><i class="fa-solid fa-chevron-down text-slate-400 faq-icon"></i>
+                    <button class="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none" onclick="this.parentElement.classList.toggle('active')">
+                        <span class="font-semibold text-slate-800">Кто проводит исследование?</span><i class="fa-solid fa-chevron-down text-slate-400 faq-icon"></i>
                     </button>
-                    <div class="faq-content bg-slate-50"><div class="px-6 py-4 text-sm text-slate-600">Базовые знания Python приветствуются, но не обязательны. В команде есть роли для конструкторов, дизайнеров и исследователей.</div></div>
+                    <div class="faq-content bg-slate-50"><div class="px-6 py-4 text-sm text-slate-600">Эксперимент организован Технопарком РГСУ, который обеспечивает техническую базу и обработку данных, при методологической поддержке Медицинской высшей школы РГСУ.</div></div>
                 </div>
                 <div class="bg-white rounded-xl border border-slate-200 overflow-hidden faq-item reveal-element delay-200">
-                    <button class="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none" onclick="this.parentElement.classList.toggle('active')" data-hover>
-                        <span class="font-semibold text-slate-800">Можно ли совмещать с учебой?</span><i class="fa-solid fa-chevron-down text-slate-400 faq-icon"></i>
+                    <button class="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none" onclick="this.parentElement.classList.toggle('active')">
+                        <span class="font-semibold text-slate-800">Безопасно ли это?</span><i class="fa-solid fa-chevron-down text-slate-400 faq-icon"></i>
                     </button>
-                    <div class="faq-content bg-slate-50"><div class="px-6 py-4 text-sm text-slate-600">Да, работа в лаборатории организована в свободное от пар время. Это отличная возможность для практики.</div></div>
+                    <div class="faq-content bg-slate-50"><div class="px-6 py-4 text-sm text-slate-600">Да. Протокол эксперимента был рассмотрен и утвержден этическим комитетом РГСУ при МВШ. Используются только неинвазивные методы регистрации данных.</div></div>
                 </div>
                 <div class="bg-white rounded-xl border border-slate-200 overflow-hidden faq-item reveal-element delay-300">
-                    <button class="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none" onclick="this.parentElement.classList.toggle('active')" data-hover>
-                        <span class="font-semibold text-slate-800">Какое оборудование я смогу использовать?</span><i class="fa-solid fa-chevron-down text-slate-400 faq-icon"></i>
+                    <button class="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none" onclick="this.parentElement.classList.toggle('active')">
+                        <span class="font-semibold text-slate-800">Какой формат участия?</span><i class="fa-solid fa-chevron-down text-slate-400 faq-icon"></i>
                     </button>
-                    <div class="faq-content bg-slate-50"><div class="px-6 py-4 text-sm text-slate-600">Участники получают доступ к нейроинтерфейсам, 3D-сканерам RangeVision и мощным рабочим станциям с лицензионным ПО.</div></div>
+                    <div class="faq-content bg-slate-50"><div class="px-6 py-4 text-sm text-slate-600">Это 3-х часовой интенсив, в ходе которого участники проходят путь от снятия ЭЭГ до создания своего цифрового прототипа.</div></div>
                 </div>
             </div>
         </div>
@@ -559,55 +507,49 @@
         </div>
 
         <div class="max-w-4xl mx-auto px-4 relative z-10 text-center">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-500/20 rounded-full mb-8 backdrop-blur-sm border border-blue-500/30 reveal-element" data-hover><i class="fa-brands fa-telegram text-5xl text-blue-400 transform -translate-x-0.5 translate-y-0.5"></i></div>
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-500/20 rounded-full mb-8 backdrop-blur-sm border border-blue-500/30 reveal-element"><i class="fa-brands fa-telegram text-5xl text-blue-400 transform -translate-x-0.5 translate-y-0.5"></i></div>
             <h2 class="text-3xl md:text-5xl font-bold mb-6 tracking-tight reveal-element delay-100">Следите за ходом эксперимента</h2>
-            <p class="text-slate-400 mb-10 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed reveal-element delay-200">Все новости, результаты тестов, 3D-модели и инсайты лаборатории публикуем в нашем Telegram-канале Технопарка РГСУ.</p>
+            <p class="text-slate-400 mb-10 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed reveal-element delay-200">Все новости, результаты тестов, 3D-модели и инсайты лаборатории публикуем в нашем Telegram-канале.</p>
             
-            <div class="flex flex-col items-center gap-6 reveal-element delay-300">
-                <a href="https://t.me/TechnoparkRGSU" target="_blank" class="btn-interactive inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#229ED9] hover:bg-[#1e8dbf] text-white rounded-full font-bold text-lg shadow-lg hover:shadow-blue-500/40 transition-all transform hover:-translate-y-1" data-hover data-magnetic><i class="fa-brands fa-telegram text-2xl"></i> Подписаться на канал</a>
-                
-                <form id="contact-form" class="w-full max-w-md mt-8 space-y-4 bg-slate-800/50 p-6 rounded-2xl border border-slate-700 backdrop-blur-sm relative">
-                    <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 flex gap-2" id="countdown">
-                        <div class="countdown-item"><div class="countdown-value" id="days">00</div><div class="countdown-label">Дней</div></div>
-                        <div class="countdown-item"><div class="countdown-value" id="hours">00</div><div class="countdown-label">Часов</div></div>
-                        <div class="countdown-item"><div class="countdown-value" id="minutes">00</div><div class="countdown-label">Мин</div></div>
-                    </div>
-                    <h3 class="text-lg font-semibold text-slate-200 mb-4 font-mono mt-8">ИЛИ ОСТАВЬТЕ ЗАЯВКУ:</h3>
-                    <div class="relative group">
-                        <i class="fa-regular fa-user absolute left-4 top-3.5 text-slate-400 group-focus-within:text-rgsu-blue transition-colors"></i>
-                        <input type="text" id="fio" required name="fio" class="peer w-full pl-10 pr-4 py-3 rounded-lg bg-slate-900 border border-slate-600 text-white focus:border-rgsu-blue focus:ring-1 focus:ring-rgsu-blue outline-none transition-all placeholder-transparent" placeholder="ФИО">
-                        <label for="fio" class="absolute left-10 top-3 text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-slate-500 peer-focus:top-1 peer-focus:text-xs peer-focus:text-rgsu-blue cursor-text">ФИО</label>
-                    </div>
-                    <div class="relative group">
-                        <i class="fa-solid fa-layer-group absolute left-4 top-3.5 text-slate-400 group-focus-within:text-rgsu-blue transition-colors"></i>
-                        <input type="text" id="group" required name="group" class="peer w-full pl-10 pr-4 py-3 rounded-lg bg-slate-900 border border-slate-600 text-white focus:border-rgsu-blue focus:ring-1 focus:ring-rgsu-blue outline-none transition-all placeholder-transparent" placeholder="Группа">
-                        <label for="group" class="absolute left-10 top-3 text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-slate-500 peer-focus:top-1 peer-focus:text-xs peer-focus:text-rgsu-blue cursor-text">Группа / Факультет</label>
-                    </div>
-                    <div class="relative group">
-                        <i class="fa-solid fa-envelope absolute left-4 top-3.5 text-slate-400 group-focus-within:text-rgsu-blue transition-colors"></i>
-                        <input type="email" id="email" required name="email" class="peer w-full pl-10 pr-4 py-3 rounded-lg bg-slate-900 border border-slate-600 text-white focus:border-rgsu-blue focus:ring-1 focus:ring-rgsu-blue outline-none transition-all placeholder-transparent" placeholder="Email">
-                        <label for="email" class="absolute left-10 top-3 text-slate-400 text-xs transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-slate-500 peer-focus:top-1 peer-focus:text-xs peer-focus:text-rgsu-blue cursor-text">Email</label>
-                    </div>
-                    <button type="submit" class="w-full bg-rgsu-blue hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors shadow-lg mt-2 btn-interactive" data-hover data-magnetic>Отправить заявку</button>
-                </form>
+            <a href="https://t.me/DTRSSU" target="_blank" class="btn-interactive inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#229ED9] hover:bg-[#1e8dbf] text-white rounded-full font-bold text-lg shadow-lg hover:shadow-blue-500/40 transition-all transform hover:-translate-y-1 mb-12" data-magnetic><i class="fa-brands fa-telegram text-2xl"></i> Подписаться на канал</a>
+            
+            <div class="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16 text-left reveal-element delay-300">
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-location-dot text-2xl text-rgsu-blue mt-1"></i>
+                    <div><h4 class="font-bold text-white">Адрес</h4><p class="text-slate-400 text-sm">ул. Беговая, 12 (м. Беговая)</p></div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-globe text-2xl text-rgsu-blue mt-1"></i>
+                    <div><h4 class="font-bold text-white">Веб-сайт</h4><a href="https://technopark-rgsu.ru" target="_blank" class="text-slate-400 text-sm hover:text-white transition-colors">technopark-rgsu.ru</a></div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <i class="fa-brands fa-telegram text-2xl text-rgsu-blue mt-1"></i>
+                    <div><h4 class="font-bold text-white">Связь</h4><a href="https://t.me/technoparkrgsu" target="_blank" class="text-slate-400 text-sm hover:text-white transition-colors">@technoparkrgsu</a></div>
+                </div>
             </div>
-            <div class="mt-16 pt-8 border-t border-slate-800 text-slate-500 text-sm font-mono">&copy; 2025/2026 Технопарк РГСУ. Лаборатория экспериментального проектирования.<br><a href="mailto:technopark@rgsu.net" class="hover:text-blue-400 transition-colors mt-2 inline-block">technopark@rgsu.net</a></div>
+
+            <div class="mt-16 pt-8 border-t border-slate-800 text-slate-500 text-sm font-mono">&copy; 2025/2026 Центр обучения, профориентации и проектной деятельности в области IT-технологий.</div>
         </div>
     </footer>
 
-    <button id="back-to-top" onclick="window.scrollTo(0,0)" class="fixed bottom-8 right-8 bg-rgsu-blue text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all z-40" aria-label="Наверх" data-hover data-magnetic><i class="fa-solid fa-arrow-up"></i></button>
+    <button id="back-to-top" onclick="window.scrollTo(0,0)" class="fixed bottom-8 right-8 bg-rgsu-blue text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all z-40" aria-label="Наверх" data-magnetic><i class="fa-solid fa-arrow-up"></i></button>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const preloader = document.getElementById('preloader');
             window.addEventListener('load', () => {
                 setTimeout(() => {
-                    preloader.classList.add('loaded');
+                    if(preloader) preloader.classList.add('loaded');
                     document.body.style.overflow = 'auto';
-                }, 1500);
+                }, 800);
             });
+            setTimeout(() => {
+                if(preloader && !preloader.classList.contains('loaded')) {
+                     preloader.classList.add('loaded');
+                     document.body.style.overflow = 'auto';
+                }
+            }, 5000);
 
-            // Intersection Observer + Stats Animation
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -615,7 +557,6 @@
                         if(entry.target.classList.contains('roadmap-marker')) {
                             entry.target.classList.add('animate-pulse');
                         }
-                        // Stats Animation trigger
                         if (entry.target.querySelector('[data-target]')) {
                             const counter = entry.target.querySelector('[data-target]');
                             const target = +counter.getAttribute('data-target');
@@ -634,7 +575,9 @@
                             updateCounter();
                         }
                     } else {
-                        // Optional: remove visible class to replay animation on scroll up
+                        if(entry.target.classList.contains('roadmap-marker')) {
+                            entry.target.classList.remove('animate-pulse');
+                        }
                     }
                 });
             }, { threshold: 0.1 });
@@ -644,58 +587,21 @@
             });
             
             try { initThreeJSScenes(); } catch(e) { console.warn('ThreeJS failed:', e); }
-            initCustomCursor();
             init3DTilt();
             initTextScramble();
             initMagneticButtons();
-            startCountdown();
             try { initNeuroBackground(); } catch(e) { console.warn('Canvas failed:', e); }
             initMobileMenu();
-
-            const form = document.getElementById('contact-form');
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toast-message');
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbyd98X5_bBjyJy8-d4m2fXOTNz1WXssHNSTLUjLlbOjpltUZD9Bl49ej9SqGHcImNWx6w/exec'; 
-
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const btn = form.querySelector('button');
-                const originalText = btn.innerText;
-                btn.innerText = 'Отправка...';
-                btn.disabled = true;
-
-                fetch(scriptURL, { method: 'POST', body: new FormData(form), mode: 'no-cors'})
-                    .then(() => {
-                        btn.innerText = originalText;
-                        btn.disabled = false;
-                        form.reset();
-                        toastMessage.innerText = "Заявка успешно отправлена!";
-                        toast.classList.remove('error');
-                        toast.classList.add('show');
-                        setTimeout(() => { toast.classList.remove('show'); }, 4000);
-                    })
-                    .catch(error => {
-                        console.error('Error!', error.message);
-                        btn.innerText = originalText;
-                        btn.disabled = false;
-                        toastMessage.innerText = "Ошибка отправки. Попробуйте позже.";
-                        toast.classList.add('error');
-                        toast.classList.add('show');
-                        setTimeout(() => { toast.classList.remove('show'); }, 4000);
-                    });
-            });
         });
 
-        // --- Optimized Neuro Background ---
         function initNeuroBackground() {
             const canvas = document.getElementById('neuro-canvas');
             if(!canvas) return;
             const ctx = canvas.getContext('2d');
             let w, h, particles = [];
             
-            // Adaptive particle count
             const isMobile = window.innerWidth < 768;
-            const particleCount = isMobile ? 20 : 60; // Reduce particles on mobile
+            const particleCount = isMobile ? 20 : 60;
             const connectionDistance = 150;
             const mouseDistance = 200;
 
@@ -703,7 +609,6 @@
             let animationFrameId;
             let isVisible = true;
 
-            // Optimization: Track visibility
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     isVisible = entry.isIntersecting;
@@ -768,7 +673,6 @@
             animateParticles();
         }
 
-        // --- Optimized Modal ---
         function closeModal(e, force = false) {
             if (force || e.target.id === 'universal-modal') { toggleModal(false); }
         }
@@ -783,7 +687,6 @@
             } else {
                 modal.classList.add('hidden'); document.body.style.overflow = '';
                 videoContent.classList.add('hidden'); imageContent.classList.add('hidden');
-                // Stop video by resetting src
                 const iframe = videoContent.querySelector('iframe');
                 if(iframe) { const src = iframe.src; iframe.src = src; }
             }
@@ -794,14 +697,6 @@
             videoContent.classList.remove('hidden'); toggleModal(true);
         }
 
-        function openImageModal(src) {
-            const imageContent = document.getElementById('modal-image');
-            const img = imageContent.querySelector('img');
-            img.src = src;
-            imageContent.classList.remove('hidden'); toggleModal(true);
-        }
-
-        // --- Optimized Mobile Menu ---
         function initMobileMenu() {
             const btn = document.getElementById('mobile-menu-btn');
             const menu = document.getElementById('mobile-menu');
@@ -812,13 +707,13 @@
 
             function openMenu() {
                 menu.classList.remove('hidden');
-                setTimeout(() => { drawer.classList.remove('translate-x-full'); }, 10); // Small delay for transition
+                setTimeout(() => { drawer.classList.remove('translate-x-full'); }, 10);
                 btn.setAttribute('aria-expanded', 'true');
             }
 
             function closeMenu() {
                 drawer.classList.add('translate-x-full');
-                setTimeout(() => { menu.classList.add('hidden'); }, 300); // Wait for transition
+                setTimeout(() => { menu.classList.add('hidden'); }, 300);
                 btn.setAttribute('aria-expanded', 'false');
             }
 
@@ -828,7 +723,6 @@
             links.forEach(link => link.addEventListener('click', closeMenu));
         }
 
-        // --- Throttled Scroll Handler ---
         let lastScrollTime = 0;
         function throttleScroll(callback, limit) {
             return function() {
@@ -857,7 +751,6 @@
                 if (winScroll > 300) backBtn.classList.add('visible'); else backBtn.classList.remove('visible');
             }
 
-            // Simplified ScrollSpy
             const navLi = document.querySelectorAll(".nav-link");
             let current = "";
             document.querySelectorAll("section").forEach((section) => {
@@ -868,24 +761,7 @@
                 li.classList.remove("active");
                 if (li.getAttribute("href").includes(current)) li.classList.add("active");
             });
-        }, 50), {passive: true}); // Update every 50ms
-
-        // ... [initCustomCursor, init3DTilt, initMagneticButtons, initTextScramble, startCountdown remain same] ...
-        
-        function initCustomCursor() {
-            const cursorDot = document.getElementById('cursor-dot');
-            const cursorOutline = document.getElementById('cursor-outline');
-            if (window.matchMedia("(pointer: fine)").matches && cursorDot && cursorOutline) {
-                window.addEventListener('mousemove', (e) => {
-                    cursorDot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-                    cursorOutline.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 500, fill: "forwards" });
-                }, {passive: true});
-                document.querySelectorAll('a, button, [data-hover]').forEach(el => {
-                    el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
-                    el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
-                });
-            }
-        }
+        }, 50), {passive: true});
 
         function init3DTilt() {
             if (window.matchMedia("(pointer: coarse)").matches) return;
@@ -908,7 +784,7 @@
         }
 
         function initMagneticButtons() {
-            if (window.matchMedia("(pointer: coarse)").matches) return; // Disable on touch
+            if (window.matchMedia("(pointer: coarse)").matches) return; 
             const btns = document.querySelectorAll('[data-magnetic]');
             btns.forEach(btn => {
                 btn.addEventListener('mousemove', (e) => {
@@ -942,29 +818,6 @@
             });
         }
 
-        function startCountdown() {
-            const deadline = new Date(); deadline.setDate(deadline.getDate() + 14); 
-            const daysEl = document.getElementById('days');
-            const hoursEl = document.getElementById('hours');
-            const minsEl = document.getElementById('minutes');
-            
-            if(!daysEl || !hoursEl || !minsEl) return;
-
-            function updateClock() {
-                const t = Date.parse(deadline) - Date.parse(new Date());
-                const days = Math.floor(t / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((t / (1000 * 60 * 60)) % 24);
-                const minutes = Math.floor((t / 1000 / 60) % 60);
-                daysEl.innerText = ('0' + days).slice(-2);
-                hoursEl.innerText = ('0' + hours).slice(-2);
-                minsEl.innerText = ('0' + minutes).slice(-2);
-                if (t <= 0) { clearInterval(timeinterval); }
-            }
-            updateClock();
-            const timeinterval = setInterval(updateClock, 1000);
-        }
-
-        // --- Optimized Three.js Scenes ---
         let hoverState = { neuro: false, reverse: false, generative: false };
         function initThreeJSScenes() {
             const containers = {
@@ -976,46 +829,47 @@
                 roadmap3: document.getElementById('roadmap-step-3')
             };
             
-            // Mouse interactions
             document.querySelectorAll('.tech-card[data-type]').forEach(card => {
                 card.addEventListener('mouseenter', () => { hoverState[card.dataset.type] = true; });
                 card.addEventListener('mouseleave', () => { hoverState[card.dataset.type] = false; });
             });
 
-            // Setup Visibility Observers for Performance
-            const sceneObservers = []; 
+            const width = 100; const height = 100; const scenes = [];
 
+            function removeLoader(container) { const loader = container.querySelector('.skeleton-loader'); if(loader) loader.remove(); }
             function createScene(container, w, h, setupFn, type) {
                 if(!container) return null;
                 const scene = new THREE.Scene();
                 const camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 1000);
-                camera.position.z = type.startsWith('rm') ? 4 : 5; // Distance based on type
-                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-                renderer.setSize(w, h);
-                const loader = container.querySelector('.skeleton-loader');
-                if(loader) loader.remove();
-                container.appendChild(renderer.domElement);
-                
-                const item = { scene, camera, renderer, type, visible: false };
-                setupFn(scene, item);
-                
-                // Observe visibility
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        item.visible = entry.isIntersecting;
+                camera.position.z = type.startsWith('rm') ? 4 : 5; 
+                try {
+                    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                    renderer.setSize(w, h);
+                    const loader = container.querySelector('.skeleton-loader');
+                    if(loader) loader.remove();
+                    container.appendChild(renderer.domElement);
+                    
+                    const item = { scene, camera, renderer, type, visible: false };
+                    setupFn(scene, item);
+                    
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            item.visible = entry.isIntersecting;
+                        });
                     });
-                });
-                observer.observe(container);
-                sceneObservers.push(item);
-                
-                return item;
+                    observer.observe(container);
+                    return item;
+                } catch(e) {
+                    console.warn("WebGL not supported for scene " + type);
+                    return null;
+                }
             }
 
-            // Scene Setups
+            const sceneObservers = [];
+
             const neuroSetup = (scene, item) => {
                 const geometry = new THREE.BufferGeometry();
                 const vertices = [];
-                // Reduce particles on mobile
                 const count = window.innerWidth < 768 ? 30 : 60;
                 for (let i = 0; i < count; i++) { vertices.push((Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4); }
                 geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
@@ -1041,31 +895,28 @@
                 scene.add(item.mesh);
             };
 
-            // Initialize scenes
-            createScene(containers.neuro, 100, 100, neuroSetup, 'neuro');
-            createScene(containers.reverse, 100, 100, reverseSetup, 'reverse');
-            createScene(containers.generative, 100, 100, genSetup, 'generative');
+            const s1 = createScene(containers.neuro, 100, 100, neuroSetup, 'neuro'); if(s1) sceneObservers.push(s1);
+            const s2 = createScene(containers.reverse, 100, 100, reverseSetup, 'reverse'); if(s2) sceneObservers.push(s2);
+            const s3 = createScene(containers.generative, 100, 100, genSetup, 'generative'); if(s3) sceneObservers.push(s3);
             
-            // Roadmap scenes (simplified setup for brevity)
-            createScene(containers.roadmap1, 64, 64, (s, i) => { i.mesh = new THREE.Mesh(new THREE.SphereGeometry(1.5, 8, 8), new THREE.MeshBasicMaterial({ color: 0x0055A5, wireframe: true })); s.add(i.mesh); }, 'rm1');
-            createScene(containers.roadmap2, 64, 64, (s, i) => { 
+            const s4 = createScene(containers.roadmap1, 64, 64, (s, i) => { i.mesh = new THREE.Mesh(new THREE.SphereGeometry(1.5, 8, 8), new THREE.MeshBasicMaterial({ color: 0x0055A5, wireframe: true })); s.add(i.mesh); }, 'rm1'); if(s4) sceneObservers.push(s4);
+            const s5 = createScene(containers.roadmap2, 64, 64, (s, i) => { 
                 const geo = new THREE.BufferGeometry(); const v = []; for(let k=0; k<100; k++) v.push(Math.random()*2-1, Math.random()*2-1, Math.random()*2-1); 
                 geo.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
                 i.mesh = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x6366f1, size: 0.1 })); s.add(i.mesh); 
-            }, 'rm2');
-            createScene(containers.roadmap3, 64, 64, (s, i) => { 
+            }, 'rm2'); if(s5) sceneObservers.push(s5);
+            const s6 = createScene(containers.roadmap3, 64, 64, (s, i) => { 
                 const geo = new THREE.IcosahedronGeometry(1.2, 1); i.mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true })); 
                 i.originalPos = geo.attributes.position.clone(); s.add(i.mesh); 
-            }, 'rm3');
+            }, 'rm3'); if(s6) sceneObservers.push(s6);
 
-            // Animation Loop
             const clock = new THREE.Clock();
             function animate() {
                 requestAnimationFrame(animate);
                 const time = clock.getElapsedTime();
 
                 sceneObservers.forEach(item => {
-                    if (item.visible) { // Only render if visible
+                    if (item.visible) { 
                         const speed = hoverState[item.type] ? 3 : 1;
                         if (item.type === 'neuro') {
                             item.mesh.rotation.y += 0.005 * speed; item.mesh.rotation.x += 0.002 * speed;
@@ -1081,7 +932,6 @@
                             item.mesh.rotation.y = time * 0.5;
                         } else if (item.type === 'rm3') {
                             item.mesh.rotation.x += 0.01; item.mesh.rotation.y += 0.01;
-                            // Morph logic
                             const positions = item.mesh.geometry.attributes.position; const original = item.originalPos;
                             for (let i = 0; i < positions.count; i++) {
                                 const px = original.getX(i); const py = original.getY(i); const pz = original.getZ(i);
@@ -1093,7 +943,7 @@
                     }
                 });
             }
-            animate();
+            if (sceneObservers.length > 0) animate();
         }
     </script>
 </body>
