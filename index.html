@@ -161,9 +161,14 @@
             transform-origin: bottom right; transition: transform 0.25s ease-out;
         }
         .link-underline:hover::after { transform: scaleX(1); transform-origin: bottom left; }
+        
+        /* Active link state for ScrollSpy */
+        .link-underline.active { color: #0055A5; }
+        .link-underline.active::after { transform: scaleX(1); transform-origin: bottom left; }
 
-        #video-modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
-        #video-modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        /* Universal Modal */
+        #universal-modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #universal-modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
         #toast {
             visibility: hidden; min-width: 250px; background-color: #333; color: #fff;
@@ -195,7 +200,6 @@
             color: #94a3b8; margin-top: 2px;
         }
 
-        /* Marquee Styles */
         .marquee-container {
             overflow: hidden; white-space: nowrap; background: #0f172a;
             color: rgba(255, 255, 255, 0.8); font-family: 'JetBrains Mono', monospace;
@@ -209,6 +213,11 @@
         .marquee-tag { margin: 0 2rem; display: inline-flex; items-center; gap: 0.5rem; }
         .marquee-tag i { color: #3b82f6; font-size: 0.7em; }
 
+        /* Canvas for Neuro Background */
+        #neuro-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.6;
+        }
+
         @media (max-width: 768px) {
             body { cursor: auto; }
             .cursor-dot, .cursor-outline { display: none; }
@@ -221,20 +230,24 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900 flex flex-col min-h-screen">
 
-    <!-- Elements -->
     <div class="cursor-dot" id="cursor-dot"></div>
     <div class="cursor-outline" id="cursor-outline"></div>
     <div id="preloader"><div class="text-center"><div class="text-rgsu-blue font-mono font-bold text-xl mb-4 tracking-widest">INITIALIZING LAB...</div><div class="loader-bar"></div></div></div>
     <div class="noise-overlay"></div>
     <div id="progress-bar"></div>
 
-    <div id="video-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div class="relative w-full max-w-4xl bg-black rounded-2xl overflow-hidden shadow-2xl aspect-video border border-slate-700">
-            <button onclick="toggleModal(false)" class="absolute top-4 right-4 z-20 text-white hover:text-rgsu-blue transition-colors cursor-pointer bg-black/50 rounded-full w-10 h-10 flex items-center justify-center" data-hover>
+    <div id="universal-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4" onclick="closeModal(event)">
+        <div class="relative w-full max-w-5xl bg-transparent rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center" id="modal-container">
+            <button onclick="closeModal(event, true)" class="absolute -top-12 right-0 z-30 text-white hover:text-rgsu-blue transition-colors cursor-pointer bg-white/10 rounded-full w-10 h-10 flex items-center justify-center" data-hover>
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
-            <div class="w-full h-full flex items-center justify-center bg-slate-900 text-white">
-                <iframe class="w-full h-full" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&controls=1&showinfo=0&modestbranding=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            
+            <div id="modal-video" class="hidden w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-700">
+                <iframe class="w-full h-full" src="https://drive.google.com/file/d/1tCm7l9gN5T-VGyO0mkgCYFwsdKOt2Rzl/preview" title="Video Player" frameborder="0" allow="autoplay; fullscreen" loading="lazy"></iframe>
+            </div>
+
+            <div id="modal-image" class="hidden w-full h-auto max-h-[85vh] flex items-center justify-center">
+                <img src="" alt="Gallery Preview" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl border border-slate-700/50" loading="lazy">
             </div>
         </div>
     </div>
@@ -244,7 +257,6 @@
         <span id="toast-message">Заявка успешно отправлена!</span>
     </div>
 
-    <!-- Navigation -->
     <nav class="fixed w-full z-50 glass-panel shadow-sm transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
@@ -262,6 +274,7 @@
                         <a href="#software" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all" data-hover>Софт</a>
                         <a href="#roadmap" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all" data-hover>План</a>
                         <a href="#gallery" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all" data-hover>Галерея</a>
+                        <a href="#faq" class="nav-link link-underline text-slate-600 hover:text-rgsu-blue px-3 py-2 rounded-lg text-sm font-semibold transition-all" data-hover>FAQ</a>
                         <a href="https://t.me/TechnoparkRGSU" target="_blank" class="btn-interactive tg-gradient text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:shadow-lg transition-all ml-4 flex items-center gap-2" data-hover data-magnetic>
                             <i class="fa-brands fa-telegram text-lg"></i> Telegram
                         </a>
@@ -280,6 +293,8 @@
                 <a href="#competencies" class="mobile-link block px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:bg-blue-50 hover:text-rgsu-blue transition-colors">Навыки</a>
                 <a href="#software" class="mobile-link block px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:bg-blue-50 hover:text-rgsu-blue transition-colors">Софт</a>
                 <a href="#roadmap" class="mobile-link block px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:bg-blue-50 hover:text-rgsu-blue transition-colors">План</a>
+                <a href="#gallery" class="mobile-link block px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:bg-blue-50 hover:text-rgsu-blue transition-colors">Галерея</a>
+                <a href="#faq" class="mobile-link block px-3 py-3 rounded-md text-base font-medium text-slate-700 hover:bg-blue-50 hover:text-rgsu-blue transition-colors">FAQ</a>
                 <a href="https://t.me/TechnoparkRGSU" target="_blank" class="mobile-link btn-interactive block w-full text-center tg-gradient text-white px-3 py-3 rounded-lg text-base font-bold mt-4 shadow-md transition-colors">
                     <i class="fa-brands fa-telegram mr-2"></i> Telegram
                 </a>
@@ -287,15 +302,8 @@
         </div>
     </nav>
 
-    <!-- Hero -->
     <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-40 overflow-hidden flex items-center min-h-[90vh]" id="hero">
-        <div id="hero-bg-layer" class="absolute inset-0 z-0 transition-transform duration-100 ease-out will-change-transform">
-            <div class="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-            <div class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-gradient-to-tr from-blue-100/40 to-purple-100/40 rounded-full blur-[100px] animate-blob mix-blend-multiply filter pointer-events-none"></div>
-            <div class="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-gradient-to-tr from-indigo-100/40 to-blue-100/40 rounded-full blur-[80px] animate-blob animation-delay-2000 mix-blend-multiply filter pointer-events-none"></div>
-        </div>
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+        <canvas id="neuro-canvas"></canvas> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
             <div class="flex flex-col items-center text-center">
                 <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white border border-blue-100 shadow-sm backdrop-blur-sm mb-8 transition-transform hover:scale-105 cursor-default group" data-hover>
                     <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rgsu-blue opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rgsu-blue"></span></span>
@@ -305,13 +313,16 @@
                 <p class="text-lg md:text-xl lg:text-2xl text-slate-600 mb-10 max-w-3xl leading-relaxed font-light reveal-element delay-100">
                     Интеграция нейроинтерфейсов в процессы инженерного 3D-моделирования. <br class="hidden md:block"><span class="font-medium text-slate-900">Создаем адаптивные формы, управляемые активностью мозга.</span>
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center reveal-element delay-200">
-                    <button onclick="toggleModal(true)" class="btn-interactive group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white transition-all duration-200 bg-rgsu-blue rounded-full shadow-lg hover:bg-blue-700 hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 w-full sm:w-auto" data-hover data-magnetic>
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center reveal-element delay-200 justify-center">
+                    <button onclick="openVideoModal()" class="btn-interactive group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white transition-all duration-200 bg-rgsu-blue rounded-full shadow-lg hover:bg-blue-700 hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 w-full sm:w-auto" data-hover data-magnetic>
                         <span class="mr-3">Смотреть обзор</span>
                         <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform border border-white/30"><i class="fa-solid fa-play text-[10px] pl-0.5"></i></div>
                     </button>
                     <a href="https://drive.google.com/file/d/1yoXaLPPu-F7f5qolYfQB8LnRq-0EnnPv/view?usp=drive_link" target="_blank" class="btn-interactive inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-600 transition-all duration-200 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:text-rgsu-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-200 w-full sm:w-auto group" data-hover data-magnetic>
                          <i class="fa-solid fa-file-pdf text-red-500 mr-2 group-hover:scale-110 transition-transform"></i><span>Методичка (PDF)</span>
+                    </a>
+                    <a href="https://drive.google.com/file/d/1SVA_Y8W9bML1xAlemNewiwFMmkh6oEF0/view?usp=drive_link" target="_blank" class="btn-interactive inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-600 transition-all duration-200 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:text-rgsu-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-200 w-full sm:w-auto group" data-hover data-magnetic>
+                         <i class="fa-solid fa-file-powerpoint text-orange-500 mr-2 group-hover:scale-110 transition-transform"></i><span>Презентация</span>
                     </a>
                 </div>
                 <div class="mt-16 pt-8 border-t border-slate-200/60 flex flex-wrap justify-center gap-x-8 gap-y-4 opacity-70 hover:opacity-100 transition-opacity duration-500 reveal-element delay-300">
@@ -330,7 +341,6 @@
         </div>
     </section>
 
-    <!-- NEW: Infinite Ticker -->
     <div class="marquee-container">
         <div class="marquee-content">
             <span class="marquee-tag"><i class="fa-solid fa-circle"></i> NEUROINTERFACE</span>
@@ -348,7 +358,6 @@
         </div>
     </div>
 
-    <!-- About -->
     <section id="about" class="py-16 md:py-24 bg-white border-y border-slate-100 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
@@ -371,7 +380,6 @@
         </div>
     </section>
 
-    <!-- Competencies -->
     <section id="competencies" class="py-16 md:py-24 bg-slate-50 scroll-mt-20 border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10 md:mb-16 reveal-element">
@@ -399,7 +407,6 @@
         </div>
     </section>
 
-    <!-- Software -->
     <section id="software" class="py-16 md:py-24 bg-white scroll-mt-20 relative">
         <svg class="absolute top-0 left-0 w-full h-12 text-slate-100 fill-current transform rotate-180" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path></svg>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -436,7 +443,6 @@
         </div>
     </section>
 
-    <!-- Roadmap -->
     <section id="roadmap" class="py-16 md:py-24 bg-slate-50 border-t border-slate-200 scroll-mt-20 relative">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10 md:mb-16 reveal-element">
@@ -460,7 +466,6 @@
         </div>
     </section>
 
-    <!-- Gallery -->
     <section id="gallery" class="py-16 md:py-24 bg-white border-t border-slate-100 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10 md:mb-16 reveal-element">
@@ -468,23 +473,23 @@
                 <h2 class="text-2xl md:text-4xl font-extrabold text-slate-900 mt-2" data-scramble>Галерея результатов</h2>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="group relative overflow-hidden rounded-2xl h-64 cursor-pointer reveal-element" data-hover>
+                <div class="group relative overflow-hidden rounded-2xl h-64 cursor-pointer reveal-element" data-hover onclick="openImageModal('https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=1200&auto=format&fit=crop')">
                     <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-slate-900/0 transition-colors z-10"></div>
-                    <img src="https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=800&auto=format&fit=crop" alt="Abstract 3D Shape" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <img src="https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=800&auto=format&fit=crop" alt="Abstract 3D Shape" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
                     <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
                         <h4 class="text-white font-bold text-lg">Биоморфная структура #1</h4><p class="text-slate-300 text-xs">Сгенерировано по ЭЭГ (Альфа-ритм)</p>
                     </div>
                 </div>
-                <div class="group relative overflow-hidden rounded-2xl h-64 cursor-pointer reveal-element delay-100" data-hover>
+                <div class="group relative overflow-hidden rounded-2xl h-64 cursor-pointer reveal-element delay-100" data-hover onclick="openImageModal('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop')">
                     <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-slate-900/0 transition-colors z-10"></div>
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" alt="Abstract 3D Shape" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" alt="Abstract 3D Shape" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
                     <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
                         <h4 class="text-white font-bold text-lg">Параметрический узор</h4><p class="text-slate-300 text-xs">T-FLEX CAD + Python Script</p>
                     </div>
                 </div>
-                <div class="group relative overflow-hidden rounded-2xl h-64 cursor-pointer reveal-element delay-200" data-hover>
+                <div class="group relative overflow-hidden rounded-2xl h-64 cursor-pointer reveal-element delay-200" data-hover onclick="openImageModal('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop')">
                     <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-slate-900/0 transition-colors z-10"></div>
-                    <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" alt="Abstract 3D Shape" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" alt="Abstract 3D Shape" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
                     <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
                         <h4 class="text-white font-bold text-lg">Нейро-топология</h4><p class="text-slate-300 text-xs">Оптимизация формы под нагрузкой</p>
                     </div>
@@ -493,7 +498,17 @@
         </div>
     </section>
 
-    <!-- Mentors -->
+    <section class="py-12 bg-slate-900 text-white border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center" id="stats-container">
+                <div class="reveal-element"><div class="text-3xl md:text-4xl font-bold font-mono text-blue-400 mb-1" data-target="120">0</div><div class="text-xs text-slate-400 uppercase tracking-widest">Часов ЭЭГ</div></div>
+                <div class="reveal-element delay-100"><div class="text-3xl md:text-4xl font-bold font-mono text-purple-400 mb-1" data-target="50">0</div><div class="text-xs text-slate-400 uppercase tracking-widest">3D-прототипов</div></div>
+                <div class="reveal-element delay-200"><div class="text-3xl md:text-4xl font-bold font-mono text-green-400 mb-1" data-target="15">0</div><div class="text-xs text-slate-400 uppercase tracking-widest">Участников</div></div>
+                <div class="reveal-element delay-300"><div class="text-3xl md:text-4xl font-bold font-mono text-yellow-400 mb-1" data-target="3">0</div><div class="text-xs text-slate-400 uppercase tracking-widest">Публикации</div></div>
+            </div>
+        </div>
+    </section>
+
     <section id="mentors" class="py-16 md:py-24 bg-white border-t border-slate-100 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10 md:mb-16 reveal-element">
@@ -517,7 +532,6 @@
         </div>
     </section>
 
-    <!-- FAQ -->
     <section id="faq" class="py-16 md:py-24 bg-slate-50 border-t border-slate-200 scroll-mt-20 relative">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10 md:mb-16 reveal-element">
@@ -546,31 +560,6 @@
         </div>
     </section>
 
-    <!-- NEW: Animated Stats Section -->
-    <section class="py-12 bg-slate-900 text-white border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center" id="stats-container">
-                <div class="reveal-element">
-                    <div class="text-3xl md:text-4xl font-bold font-mono text-blue-400 mb-1" data-target="120">0</div>
-                    <div class="text-xs text-slate-400 uppercase tracking-widest">Часов ЭЭГ</div>
-                </div>
-                <div class="reveal-element delay-100">
-                    <div class="text-3xl md:text-4xl font-bold font-mono text-purple-400 mb-1" data-target="50">0</div>
-                    <div class="text-xs text-slate-400 uppercase tracking-widest">3D-прототипов</div>
-                </div>
-                <div class="reveal-element delay-200">
-                    <div class="text-3xl md:text-4xl font-bold font-mono text-green-400 mb-1" data-target="15">0</div>
-                    <div class="text-xs text-slate-400 uppercase tracking-widest">Участников</div>
-                </div>
-                <div class="reveal-element delay-300">
-                    <div class="text-3xl md:text-4xl font-bold font-mono text-yellow-400 mb-1" data-target="3">0</div>
-                    <div class="text-xs text-slate-400 uppercase tracking-widest">Публикации</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
     <footer id="join" class="bg-slate-900 text-white py-16 md:py-24 scroll-mt-20 relative overflow-hidden">
         <svg class="absolute top-0 left-0 w-full h-12 text-slate-50 fill-current" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path></svg>
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -641,7 +630,6 @@
                             const target = +counter.getAttribute('data-target');
                             const duration = 2000;
                             const increment = target / (duration / 16);
-                            
                             let current = 0;
                             const updateCounter = () => {
                                 current += increment;
@@ -672,6 +660,7 @@
             initTextScramble();
             initMagneticButtons();
             startCountdown();
+            initNeuroBackground();
 
             const form = document.getElementById('contact-form');
             const toast = document.getElementById('toast');
@@ -707,6 +696,139 @@
             });
         });
 
+        // Neuro Background Logic
+        function initNeuroBackground() {
+            const canvas = document.getElementById('neuro-canvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let w, h, particles = [];
+            const particleCount = 60;
+            const connectionDistance = 150;
+            const mouseDistance = 200;
+
+            let mouse = { x: null, y: null };
+
+            window.addEventListener('mousemove', e => {
+                mouse.x = e.x;
+                mouse.y = e.y;
+            });
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * w;
+                    this.y = Math.random() * h;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.size = Math.random() * 2 + 1;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if(this.x < 0 || this.x > w) this.vx *= -1;
+                    if(this.y < 0 || this.y > h) this.vy *= -1;
+                    
+                    // Mouse repulsion/interaction
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
+                    if(distance < mouseDistance) {
+                        const forceDirectionX = dx / distance;
+                        const forceDirectionY = dy / distance;
+                        const force = (mouseDistance - distance) / mouseDistance;
+                        const directionX = forceDirectionX * force * this.size;
+                        const directionY = forceDirectionY * force * this.size;
+                        this.x -= directionX;
+                        this.y -= directionY;
+                    }
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0, 85, 165, 0.5)';
+                    ctx.fill();
+                }
+            }
+
+            for(let i=0; i<particleCount; i++) particles.push(new Particle());
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, w, h);
+                for(let i=0; i<particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                    
+                    for(let j=i; j<particles.length; j++) {
+                        let dx = particles[i].x - particles[j].x;
+                        let dy = particles[i].y - particles[j].y;
+                        let distance = Math.sqrt(dx*dx + dy*dy);
+                        if(distance < connectionDistance) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = `rgba(0, 85, 165, ${1 - distance/connectionDistance})`;
+                            ctx.lineWidth = 1;
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+        }
+
+        // Modal Logic Refactored
+        function closeModal(e, force = false) {
+            if (force || e.target.id === 'universal-modal') {
+                toggleModal(false);
+            }
+        }
+
+        function toggleModal(show) {
+            const modal = document.getElementById('universal-modal');
+            const videoContent = document.getElementById('modal-video');
+            const imageContent = document.getElementById('modal-image');
+            
+            if(show) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+                // Reset contents
+                videoContent.classList.add('hidden');
+                imageContent.classList.add('hidden');
+                // Stop video
+                const iframe = videoContent.querySelector('iframe');
+                if(iframe) {
+                    const src = iframe.src;
+                    iframe.src = src;
+                }
+            }
+        }
+
+        function openVideoModal() {
+            const videoContent = document.getElementById('modal-video');
+            videoContent.classList.remove('hidden');
+            toggleModal(true);
+        }
+
+        function openImageModal(src) {
+            const imageContent = document.getElementById('modal-image');
+            const img = imageContent.querySelector('img');
+            img.src = src;
+            imageContent.classList.remove('hidden');
+            toggleModal(true);
+        }
+
+        // ... [Rest of initCustomCursor, init3DTilt, initMagneticButtons, initTextScramble, startCountdown] ...
+        
         function initCustomCursor() {
             const cursorDot = document.getElementById('cursor-dot');
             const cursorOutline = document.getElementById('cursor-outline');
@@ -778,21 +900,6 @@
             });
         }
 
-        const heroSection = document.getElementById('hero');
-        const heroBg = document.getElementById('hero-bg-layer');
-        if (heroSection && heroBg) {
-            heroSection.addEventListener('mousemove', (e) => {
-                const x = (e.clientX / window.innerWidth) * 20;
-                const y = (e.clientY / window.innerHeight) * 20;
-                heroBg.style.transform = `translate(-${x}px, -${y}px)`;
-            });
-        }
-
-        function toggleModal(show) {
-            const modal = document.getElementById('video-modal');
-            if(show) { modal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; } else { modal.classList.add('hidden'); document.body.style.overflow = ''; }
-        }
-
         function startCountdown() {
             const deadline = new Date();
             deadline.setDate(deadline.getDate() + 14); 
@@ -815,8 +922,10 @@
             let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             let scrolled = (winScroll / height) * 100;
             document.getElementById("progress-bar").style.width = scrolled + "%";
+
             const navbar = document.getElementById('navbar');
             if (winScroll > 50) { navbar.classList.add('scrolled'); } else { navbar.classList.remove('scrolled'); }
+
             const roadmapSection = document.getElementById('roadmap');
             if(roadmapSection) {
                 const rect = roadmapSection.getBoundingClientRect();
@@ -830,8 +939,26 @@
                     if(line) line.style.height = percentage + '%';
                 }
             }
+
             const backBtn = document.getElementById('back-to-top');
             if (winScroll > 300) { backBtn.classList.add('visible'); } else { backBtn.classList.remove('visible'); }
+
+            // ScrollSpy Logic
+            const sections = document.querySelectorAll("section");
+            const navLi = document.querySelectorAll(".nav-link");
+            let current = "";
+            sections.forEach((section) => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 150) {
+                    current = section.getAttribute("id");
+                }
+            });
+            navLi.forEach((li) => {
+                li.classList.remove("active");
+                if (li.getAttribute("href").includes(current)) {
+                    li.classList.add("active");
+                }
+            });
         };
 
         const btn = document.getElementById('mobile-menu-btn');
@@ -849,8 +976,8 @@
             });
         });
 
+        // ThreeJS Scenes
         let hoverState = { neuro: false, reverse: false, generative: false };
-
         function initThreeJSScenes() {
             const containers = {
                 neuro: document.getElementById('icon-neuro'),
@@ -982,3 +1109,4 @@
     </script>
 </body>
 </html>
+```eof
